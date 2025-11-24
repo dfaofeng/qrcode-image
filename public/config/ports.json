@@ -1,0 +1,220 @@
+{
+  "ports": [
+    {
+      "id": "port1",
+      "name": "端口 1",
+      "qrcodeText": "PORT-001",
+      "images": [
+        {
+          "filename": "1.jpg",
+          "watermarkCoordinate": {
+            "x": 1459,
+            "y": 3107,
+            "width": 192,
+            "height": 192,
+            "rotation": 7
+          }
+        },
+        {
+          "filename": "2.jpg",
+          "watermarkCoordinate": {
+            "x": 1203,
+            "y": 3159,
+            "width": 192,
+            "height": 192,
+            "rotation": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "port2",
+      "name": "端口 2",
+      "qrcodeText": "PORT-002",
+      "images": [
+        {
+          "filename": "3.jpg",
+          "watermarkCoordinate": {
+            "x": 1914,
+            "y": 2950,
+            "width": 160,
+            "height": 160,
+            "rotation": 7
+          }
+        },
+        {
+          "filename": "4.jpg",
+          "watermarkCoordinate": {
+            "x": 478,
+            "y": 3040,
+            "width": 224,
+            "height": 224,
+            "rotation": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "port3",
+      "name": "端口 3",
+      "qrcodeText": "PORT-003",
+      "images": [
+        {
+          "filename": "5.jpg",
+          "watermarkCoordinate": {
+            "x": 552,
+            "y": 3203,
+            "width": 257,
+            "height": 257,
+            "rotation": 1
+          }
+        },
+        {
+          "filename": "6.jpg",
+          "watermarkCoordinate": {
+            "x": 1190,
+            "y": 3120,
+            "width": 289,
+            "height": 289,
+            "rotation": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "port4",
+      "name": "端口 4",
+      "qrcodeText": "PORT-004",
+      "images": [
+        {
+          "filename": "7.jpg",
+          "watermarkCoordinate": {
+            "x": 1058,
+            "y": 2799,
+            "width": 289,
+            "height": 289,
+            "rotation": 5
+          }
+        },
+        {
+          "filename": "8.jpg",
+          "watermarkCoordinate": {
+            "x": 1000,
+            "y": 3296,
+            "width": 192,
+            "height": 192,
+            "rotation": 360
+          }
+        }
+      ]
+    },
+    {
+      "id": "port5",
+      "name": "端口 5",
+      "qrcodeText": "PORT-005",
+      "images": [
+        {
+          "filename": "9.jpg",
+          "watermarkCoordinate": {
+            "x": 1212,
+            "y": 2944,
+            "width": 257,
+            "height": 257,
+            "rotation": 2
+          }
+        },
+        {
+          "filename": "10.jpg",
+          "watermarkCoordinate": {
+            "x": 773,
+            "y": 3130,
+            "width": 257,
+            "height": 257,
+            "rotation": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "port6",
+      "name": "端口 6",
+      "qrcodeText": "PORT-006",
+      "images": [
+        {
+          "filename": "11.jpg",
+          "watermarkCoordinate": {
+            "x": 1632,
+            "y": 3107,
+            "width": 192,
+            "height": 192,
+            "rotation": 4
+          }
+        },
+        {
+          "filename": "12.jpg",
+          "watermarkCoordinate": {
+            "x": 1395,
+            "y": 3316,
+            "width": 192,
+            "height": 192,
+            "rotation": 359
+          }
+        }
+      ]
+    },
+    {
+      "id": "port7",
+      "name": "端口 7",
+      "qrcodeText": "PORT-007",
+      "images": [
+        {
+          "filename": "13.jpg",
+          "watermarkCoordinate": {
+            "x": 1379,
+            "y": 2703,
+            "width": 289,
+            "height": 289,
+            "rotation": 6
+          }
+        },
+        {
+          "filename": "14.jpg",
+          "watermarkCoordinate": {
+            "x": 1674,
+            "y": 3014,
+            "width": 192,
+            "height": 192,
+            "rotation": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "port8",
+      "name": "端口 8",
+      "qrcodeText": "PORT-008",
+      "images": [
+        {
+          "filename": "15.jpg",
+          "watermarkCoordinate": {
+            "x": 1629,
+            "y": 3290,
+            "width": 192,
+            "height": 192,
+            "rotation": 2
+          }
+        },
+        {
+          "filename": "16.jpg",
+          "watermarkCoordinate": {
+            "x": 872,
+            "y": 3059,
+            "width": 289,
+            "height": 289,
+            "rotation": 2
+          }
+        }
+      ]
+    }
+  ]
+}
