@@ -78,8 +78,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import type { Coordinate } from '../types'
+import { portConfigService } from '../services/portConfigService'
 
 const imageWrapper = ref<HTMLDivElement>()
 const imageElement = ref<HTMLImageElement>()
@@ -101,11 +102,32 @@ const coordinate = reactive<Coordinate & { width: number; height: number; rotati
     rotation: 0
 })
 
-// 可用的图片列表
-const availableImages = ref([
-    '1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg',
-    '9.jpg', '10.jpg', '11.jpg', '12.jpg', '13.jpg', '14.jpg', '15.jpg', '16.jpg'
-])
+// 可用的图片列表 - 从配置文件动态加载
+const availableImages = ref<string[]>([])
+
+// 加载图片列表
+onMounted(async () => {
+    try {
+        const data = await portConfigService.loadPortConfig()
+        const imageSet = new Set<string>()
+        
+        // 从所有端口配置中提取图片文件名
+        data.ports.forEach(port => {
+            port.images.forEach(img => {
+                imageSet.add(img.filename)
+            })
+        })
+        
+        availableImages.value = Array.from(imageSet).sort()
+    } catch (error) {
+        console.error('加载图片列表失败:', error)
+        // 如果加载失败,使用默认列表
+        availableImages.value = [
+            '1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg',
+            '9.jpg', '10.jpg', '11.jpg', '12.jpg', '13.jpg', '14.jpg', '15.jpg', '16.jpg'
+        ]
+    }
+})
 
 const qrcodeBoxStyle = computed(() => ({
     left: `${coordinate.x}px`,
