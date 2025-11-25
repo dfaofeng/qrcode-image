@@ -40,8 +40,8 @@ class ImageComposerService {
         drawImage(ctx, qrcodeImage, coordinate.x, coordinate.y, qrWidth, qrHeight)
       }
 
-      // 转换为 Blob URL
-      return await canvasToBlobUrl(canvas, 'image/png', 0.95)
+      // 转换为 Blob URL (使用 JPEG 格式,速度更快)
+      return await canvasToBlobUrl(canvas, 'image/jpeg', 0.92)
     } catch (error) {
       throw new Error(`图片合成失败: ${error instanceof Error ? error.message : '未知错误'}`)
     }
@@ -51,12 +51,11 @@ class ImageComposerService {
     portConfig: PortConfig,
     qrcodeUrl: string
   ): Promise<ComposedImage[]> {
-    const results: ComposedImage[] = []
-
-    // 加载二维码图片
+    // 加载二维码图片(只加载一次)
     const qrcodeImage = await imageLoaderService.loadImage(qrcodeUrl)
 
-    for (const imageConfig of portConfig.images) {
+    // 并行处理所有图片
+    const promises = portConfig.images.map(async (imageConfig) => {
       try {
         // 加载原图
         const imagePath = `/img/${imageConfig.filename}`
@@ -72,24 +71,25 @@ class ImageComposerService {
         // 生成下载文件名
         const filename = this.generateFilename(imageConfig.filename)
 
-        results.push({
+        return {
           imageUrl: composedUrl,
           filename,
           originalFilename: imageConfig.filename,
           success: true
-        })
+        } as ComposedImage
       } catch (error) {
-        results.push({
+        return {
           imageUrl: '',
           filename: imageConfig.filename,
           originalFilename: imageConfig.filename,
           success: false,
           error: error instanceof Error ? error.message : '未知错误'
-        })
+        } as ComposedImage
       }
-    }
+    })
 
-    return results
+    // 等待所有图片处理完成
+    return await Promise.all(promises)
   }
 
   private generateFilename(originalFilename: string): string {

@@ -1,7 +1,12 @@
 class ImageLoaderService {
   private readonly SUPPORTED_FORMATS = ['jpg', 'jpeg', 'png', 'webp']
+  private imageCache = new Map<string, HTMLImageElement>()
 
   async loadImage(path: string): Promise<HTMLImageElement> {
+    // 检查缓存
+    if (this.imageCache.has(path)) {
+      return this.imageCache.get(path)!
+    }
     return new Promise((resolve, reject) => {
       // 如果是 data URL (base64),直接加载
       const isDataUrl = path.startsWith('data:')
@@ -15,6 +20,8 @@ class ImageLoaderService {
       const img = new Image()
       
       img.onload = () => {
+        // 缓存图片
+        this.imageCache.set(path, img)
         resolve(img)
       }
       
