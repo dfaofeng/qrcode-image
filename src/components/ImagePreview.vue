@@ -22,6 +22,9 @@
           <img :src="image.imageUrl" :alt="image.filename" />
           <div class="image-info">
             <span class="filename">{{ image.filename }}</span>
+            <button class="download-single-button" @click="downloadSingle(image)">
+              📥 下载
+            </button>
           </div>
         </div>
         <div v-else class="error-container">
@@ -38,6 +41,8 @@
 
 <script setup lang="ts">
 import type { ComposedImage } from '../types'
+import { downloadService } from '../services/downloadService'
+import { showToast } from '../utils/toast'
 
 interface Props {
   images: ComposedImage[]
@@ -45,6 +50,15 @@ interface Props {
 }
 
 defineProps<Props>()
+
+const downloadSingle = (image: ComposedImage) => {
+  try {
+    downloadService.downloadImage(image.imageUrl, image.filename)
+    showToast('图片下载成功!', 'success')
+  } catch (error) {
+    showToast('下载失败: ' + (error instanceof Error ? error.message : '未知错误'), 'error')
+  }
+}
 </script>
 
 <style scoped>
@@ -131,12 +145,35 @@ h3 {
 .image-info {
   padding: 10px;
   background-color: #f9f9f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 .filename {
   font-size: 14px;
   color: #666;
   word-break: break-all;
+  flex: 1;
+}
+
+.download-single-button {
+  padding: 6px 12px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+
+.download-single-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
 }
 
 .error-container {

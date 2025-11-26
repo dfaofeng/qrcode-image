@@ -9,20 +9,18 @@
             <div class="image-wrapper" ref="imageWrapper">
                 <img v-if="imageSrc" :src="imageSrc" alt="预览图片" @load="handleImageLoad" ref="imageElement" />
 
-                <div 
-                    v-if="imageLoaded" 
-                    class="qrcode-box" 
-                    :style="qrcodeBoxStyle" 
-                    @mousedown="startDrag"
-                    @wheel.prevent="handleWheel"
-                >
+                <div v-if="imageLoaded" class="qrcode-box" :style="qrcodeBoxStyle" @mousedown="startDrag"
+                    @wheel.prevent="handleWheel">
                     <div class="resize-handle" @mousedown.stop="startResize"></div>
                     <div class="rotate-handle" @mousedown.stop="startRotate"></div>
                     <div class="coordinates-display">
                         <div>显示: X:{{ Math.round(coordinate.x) }} Y:{{ Math.round(coordinate.y) }}</div>
-                        <div>实际: X:{{ Math.round(coordinate.x * imageScale) }} Y:{{ Math.round(coordinate.y * imageScale) }}</div>
-                        <div>W: {{ Math.round(coordinate.width) }} ({{ Math.round(coordinate.width * imageScale) }})</div>
-                        <div>H: {{ Math.round(coordinate.height) }} ({{ Math.round(coordinate.height * imageScale) }})</div>
+                        <div>实际: X:{{ Math.round(coordinate.x * imageScale) }} Y:{{ Math.round(coordinate.y *
+                            imageScale) }}</div>
+                        <div>W: {{ Math.round(coordinate.width) }} ({{ Math.round(coordinate.width * imageScale) }})
+                        </div>
+                        <div>H: {{ Math.round(coordinate.height) }} ({{ Math.round(coordinate.height * imageScale) }})
+                        </div>
                         <div>R: {{ Math.round(coordinate.rotation || 0) }}° | 缩放: {{ imageScale.toFixed(2) }}x</div>
                     </div>
                 </div>
@@ -37,6 +35,9 @@
                             {{ img }}
                         </option>
                     </select>
+                    <button v-if="selectedImage" class="load-config-button" @click="loadExistingConfig">
+                        📂 加载现有坐标
+                    </button>
                 </div>
 
                 <div class="coordinate-inputs">
@@ -59,13 +60,19 @@
                     <div class="input-group full-width">
                         <label>旋转角度 (度):</label>
                         <input type="range" min="0" max="360" v-model.number="coordinate.rotation" @input="updateBox" />
-                        <input type="number" min="0" max="360" v-model.number="coordinate.rotation" @input="updateBox" class="rotation-input" />
+                        <input type="number" min="0" max="360" v-model.number="coordinate.rotation" @input="updateBox"
+                            class="rotation-input" />
                     </div>
                 </div>
 
-                <button class="apply-button" @click="applyCoordinate" :disabled="!selectedImage">
-                    应用坐标
-                </button>
+                <div class="button-group">
+                    <button class="apply-button" @click="applyCoordinate" :disabled="!selectedImage">
+                        应用坐标
+                    </button>
+                    <button class="save-config-button" @click="saveConfigToFile" :disabled="!appliedCoordinate">
+                        💾 保存配置文件
+                    </button>
+                </div>
 
                 <div v-if="appliedCoordinate" class="result">
                     <h4>生成的配置:</h4>
@@ -81,6 +88,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import type { Coordinate } from '../types'
 import { portConfigService } from '../services/portConfigService'
+import { showToast } from '../utils/toast'
 
 const imageWrapper = ref<HTMLDivElement>()
 const imageElement = ref<HTMLImageElement>()
@@ -110,14 +118,14 @@ onMounted(async () => {
     try {
         const data = await portConfigService.loadPortConfig()
         const imageSet = new Set<string>()
-        
+
         // 从所有端口配置中提取图片文件名
         data.ports.forEach(port => {
             port.images.forEach(img => {
                 imageSet.add(img.filename)
             })
         })
-        
+
         availableImages.value = Array.from(imageSet).sort()
     } catch (error) {
         console.error('加载图片列表失败:', error)
@@ -147,7 +155,7 @@ const handleImageChange = () => {
 
 const handleImageLoad = () => {
     imageLoaded.value = true
-    
+
     // 计算图片缩放比例
     if (imageElement.value) {
         const naturalWidth = imageElement.value.naturalWidth
@@ -236,46 +244,46 @@ const stopResize = () => {
 // 旋转控制
 const startRotate = (e: MouseEvent) => {
     if (!imageWrapper.value) return
-    
+
     isRotating.value = true
     const rect = imageWrapper.value.getBoundingClientRect()
-    
+
     // 计算中心点
     const centerX = coordinate.x + coordinate.width / 2
     const centerY = coordinate.y + coordinate.height / 2
-    
+
     // 计算初始角度
     const startAngle = Math.atan2(
         e.clientY - rect.top - centerY,
         e.clientX - rect.left - centerX
     )
-    
+
     dragStart.rotation = (coordinate.rotation || 0) - (startAngle * 180) / Math.PI
-    
+
     document.addEventListener('mousemove', onRotate)
     document.addEventListener('mouseup', stopRotate)
 }
 
 const onRotate = (e: MouseEvent) => {
     if (!isRotating.value || !imageWrapper.value) return
-    
+
     const rect = imageWrapper.value.getBoundingClientRect()
-    
+
     // 计算中心点
     const centerX = coordinate.x + coordinate.width / 2
     const centerY = coordinate.y + coordinate.height / 2
-    
+
     // 计算当前角度
     const currentAngle = Math.atan2(
         e.clientY - rect.top - centerY,
         e.clientX - rect.left - centerX
     )
-    
+
     let newRotation = dragStart.rotation + (currentAngle * 180) / Math.PI
-    
+
     // 标准化角度到 0-360
     newRotation = ((newRotation % 360) + 360) % 360
-    
+
     coordinate.rotation = newRotation
 }
 
@@ -288,17 +296,17 @@ const stopRotate = () => {
 // 滚轮缩放
 const handleWheel = (e: WheelEvent) => {
     if (!imageWrapper.value || !imageElement.value) return
-    
+
     const delta = e.deltaY > 0 ? -10 : 10
     const imgRect = imageElement.value.getBoundingClientRect()
-    
+
     let newWidth = coordinate.width + delta
     let newHeight = coordinate.height + delta
-    
+
     // 限制最小和最大尺寸
     newWidth = Math.max(30, Math.min(newWidth, imgRect.width - coordinate.x))
     newHeight = Math.max(30, Math.min(newHeight, imgRect.height - coordinate.y))
-    
+
     coordinate.width = newWidth
     coordinate.height = newHeight
 }
@@ -310,7 +318,7 @@ const updateBox = () => {
 const applyCoordinate = () => {
     // 将显示坐标转换为实际图片坐标
     const scale = imageScale.value
-    
+
     appliedCoordinate.value = {
         filename: selectedImage.value,
         watermarkCoordinate: {
@@ -326,8 +334,83 @@ const applyCoordinate = () => {
 const copyToClipboard = () => {
     const text = JSON.stringify(appliedCoordinate.value, null, 2)
     navigator.clipboard.writeText(text).then(() => {
-        alert('配置已复制到剪贴板!')
+        showToast('配置已复制到剪贴板!', 'success')
     })
+}
+
+// 加载现有配置
+const loadExistingConfig = async () => {
+    if (!selectedImage.value) return
+
+    try {
+        const data = await portConfigService.loadPortConfig()
+
+        // 查找包含当前图片的配置
+        for (const port of data.ports) {
+            const imageConfig = port.images.find(img => img.filename === selectedImage.value)
+            if (imageConfig) {
+                const coord = imageConfig.watermarkCoordinate
+                const scale = imageScale.value
+
+                // 将实际坐标转换为显示坐标
+                coordinate.x = coord.x / scale
+                coordinate.y = coord.y / scale
+                coordinate.width = (coord.width || 150) / scale
+                coordinate.height = (coord.height || 150) / scale
+                coordinate.rotation = coord.rotation || 0
+
+                showToast(`已加载 ${selectedImage.value} 的现有坐标配置!`, 'success')
+                return
+            }
+        }
+
+        showToast('未找到该图片的配置', 'info')
+    } catch (error) {
+        showToast('加载配置失败: ' + (error instanceof Error ? error.message : '未知错误'), 'error')
+    }
+}
+
+// 保存配置到文件
+const saveConfigToFile = async () => {
+    if (!appliedCoordinate.value) return
+
+    try {
+        // 加载当前完整配置
+        const data = await portConfigService.loadPortConfig()
+
+        // 查找并更新对应图片的配置
+        let updated = false
+        for (const port of data.ports) {
+            const imageIndex = port.images.findIndex(img => img.filename === selectedImage.value)
+            if (imageIndex !== -1 && appliedCoordinate.value) {
+                port.images[imageIndex]!.watermarkCoordinate = appliedCoordinate.value.watermarkCoordinate
+                updated = true
+                break
+            }
+        }
+
+        if (!updated) {
+            showToast('未找到该图片的配置,无法更新', 'error')
+            return
+        }
+
+        // 生成 JSON 文件并下载
+        const jsonStr = JSON.stringify(data, null, 2)
+        const blob = new Blob([jsonStr], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'ports.json'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+
+        showToast('配置文件已下载! 请替换到 public/config/ 目录', 'success')
+    } catch (error) {
+        showToast('保存配置失败: ' + (error instanceof Error ? error.message : '未知错误'), 'error')
+    }
 }
 </script>
 
@@ -455,6 +538,23 @@ h3 {
     font-size: 14px;
 }
 
+.load-config-button {
+    padding: 8px 12px;
+    background-color: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-top: 8px;
+    width: 100%;
+    transition: all 0.3s;
+}
+
+.load-config-button:hover {
+    background-color: #059669;
+}
+
 .coordinate-inputs {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -493,9 +593,15 @@ h3 {
     font-size: 14px;
 }
 
-.apply-button {
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.apply-button,
+.save-config-button {
+    flex: 1;
     padding: 12px;
-    background-color: #42b983;
     color: white;
     border: none;
     border-radius: 6px;
@@ -504,11 +610,24 @@ h3 {
     transition: all 0.3s;
 }
 
+.apply-button {
+    background-color: #42b983;
+}
+
 .apply-button:hover:not(:disabled) {
     background-color: #35a372;
 }
 
-.apply-button:disabled {
+.save-config-button {
+    background-color: #f59e0b;
+}
+
+.save-config-button:hover:not(:disabled) {
+    background-color: #d97706;
+}
+
+.apply-button:disabled,
+.save-config-button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
